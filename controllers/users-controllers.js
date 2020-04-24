@@ -15,11 +15,14 @@ const s3 = new AWS.S3({
 });
 
 const uploadFile = async fileName => {
-  // console.log(fileName);
-  // console.log(process.env.AWS_BUCKET);
+  console.log(
+    '================================= UPLOADING ==============================='
+  );
+  console.log(fileName);
+  console.log(process.env.AWS_BUCKET);
   const fileContents = fs.readFileSync(fileName);
   const parsedPath = path.parse(fileName);
-  // console.log(`${process.env.IMAGES_FOLDER}${parsedPath.base}`);
+  console.log(`${process.env.IMAGES_FOLDER}${parsedPath.base}`);
 
   const params = {
     Bucket: process.env.AWS_BUCKET,
