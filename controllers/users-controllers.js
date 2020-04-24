@@ -41,6 +41,7 @@ const uploadFile = async fileName => {
 };
 
 const getUsers = async (req, res, next) => {
+  console.log('================== GET USERS =========================');
   let users;
   try {
     users = await User.find({}, '-password');
