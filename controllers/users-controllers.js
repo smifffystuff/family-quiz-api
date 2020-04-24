@@ -1,9 +1,41 @@
+const fs = require('fs');
+const path = require('path');
+
 const {validationResult} = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const AWS = require('aws-sdk');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+});
+
+const uploadFile = async fileName => {
+  // console.log(fileName);
+  // console.log(process.env.AWS_BUCKET);
+  const fileContents = fs.readFileSync(fileName);
+  const parsedPath = path.parse(fileName);
+  // console.log(`${process.env.IMAGES_FOLDER}${parsedPath.base}`);
+
+  const params = {
+    Bucket: process.env.AWS_BUCKET,
+    Key: `${process.env.IMAGES_FOLDER}${parsedPath.base}`,
+    Body: fileContents,
+    ACL: 'public-read',
+  };
+
+  const putObjectResult = await s3.putObject(params).promise();
+
+  fs.unlink(fileName, err => {
+    console.log(err);
+  });
+
+  return `${process.env.IMAGES_FOLDER}${parsedPath.base}`;
+};
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -52,13 +84,17 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
+  const imageLoc = await uploadFile(req.file.path);
+
   const createdUser = new User({
     name,
     email,
     password: hashedPassword,
-    image: req.file.path,
+    image: imageLoc,
     quizzes: [],
   });
+
+  console.log(createdUser);
 
   try {
     await createdUser.save();
