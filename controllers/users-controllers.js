@@ -52,6 +52,7 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
+  console.log('================== SIGNUP =========================');
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -69,6 +70,7 @@ const signup = async (req, res, next) => {
     const error = new HttpError('Signup failed, please try again later', 500);
     return next(error);
   }
+  console.log('================== CHECKED EXISTING =========================');
 
   if (existingUser) {
     const error = new HttpError('Email already exists', 422);
@@ -86,6 +88,8 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
+
+  console.log('================== CALLING UPLOAD =========================');
 
   const imageLoc = await uploadFile(req.file.path);
 
