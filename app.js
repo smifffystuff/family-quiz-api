@@ -13,7 +13,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+// app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -39,7 +39,8 @@ app.use((err, req, res, next) => {
   if (res.headerSent) {
     return next(error);
   }
-
+  console.log('=================== ERROR ===================');
+  console.log(err);
   res.status(err.code || 500);
   res.json({message: err.message || 'An unknown error occurred'});
 });
