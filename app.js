@@ -36,11 +36,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  console.log(err);
   if (res.headerSent) {
     return next(error);
   }
-  console.log('=================== ERROR ===================');
-  console.log(err);
   res.status(err.code || 500);
   res.json({message: err.message || 'An unknown error occurred'});
 });

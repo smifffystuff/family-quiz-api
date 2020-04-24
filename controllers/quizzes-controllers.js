@@ -5,13 +5,26 @@ const {validationResult} = require('express-validator');
 const HttpError = require('../models/http-error');
 const Quiz = require('../models/quiz');
 const User = require('../models/user');
+const Question = require('../models/question');
+
+const getAllQuizzes = async (req, res, next) => {
+  let quizzes;
+  try {
+    quizzes = await Quiz.find().populate('questions');
+  } catch (err) {
+    const error = new HttpError('Something went wrong!');
+    return next(error);
+  }
+
+  res.json({quizzes: quizzes.map(quiz => quiz.toObject({getters: true}))});
+};
 
 const getQuizById = async (req, res, next) => {
   const quizId = req.params.qid;
   let quiz;
 
   try {
-    quiz = await Quiz.findById(quizId);
+    quiz = await Quiz.findById(quizId).populate('questions');
   } catch (err) {
     const error = new HttpError('Something went wrong!');
     return next(error);
@@ -34,7 +47,12 @@ const getQuizzesByCreatorId = async (req, res, next) => {
   // let quizzes;
   let userWithQuizzes;
   try {
-    userWithQuizzes = await User.findById(userId).populate('quizzes');
+    userWithQuizzes = await User.findById(userId).populate({
+      path: 'quizzes',
+      populate: {
+        path: 'questions',
+      },
+    });
   } catch {
     const error = new HttpError('Something went wrong!', 500);
     return next(error);
@@ -169,10 +187,89 @@ const deleteQuiz = async (req, res, next) => {
   res.status(200).json({message: 'Successfully deleted'});
 };
 
+const updateQuestions = async (req, res, next) => {
+  console.log('Updating questions');
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(
+      new HttpError('Invalid inputs passed, please check your data', 422)
+    );
+  }
+
+  const quizId = req.params.qid;
+  console.log(quizId);
+  let quiz;
+
+  try {
+    quiz = await Quiz.findById(quizId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong!');
+    return next(error);
+  }
+
+  if (!quiz) {
+    const error = new HttpError(
+      'Could not find a quiz for the provided id',
+      404
+    );
+    return next(error);
+  }
+
+  const curQuestionCount = quiz.question_count;
+  console.log(curQuestionCount);
+  let questionNumber = 0;
+
+  try {
+    quiz.questions = [];
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await Question.deleteMany({quiz: quizId}, {session: sess});
+    for (const q of req.body.questions) {
+      console.log(q.question);
+      const newQuestion = new Question({
+        number: ++questionNumber,
+        question: q.question,
+        quiz: quizId,
+      });
+      await newQuestion.save({session: sess});
+      quiz.questions.push(newQuestion);
+      quiz.question_count = questionNumber;
+    }
+    await quiz.save({session: sess});
+    await sess.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError(
+      'Creating question failed, please try again',
+      500
+    );
+    return next(error);
+  }
+  res.status(201).json({quiz: quiz.toObject({getters: true})});
+
+  // if (quiz.creator.toString() !== req.userData.userId) {
+  //   return next(new HttpError('Your are not allowed to edit this quiz', 401));
+  // }
+
+  // try {
+  //   await quiz.save();
+  // } catch (err) {
+  //   console.log(err);
+  //   const error = new HttpError('Something went wrong!', 500);
+  //   return next(error);
+  // }
+  // console.log(req.body.question);
+  // res.json({message: 'Adding question'});
+};
+
 module.exports = {
+  getAllQuizzes,
   getQuizById,
   getQuizzesByCreatorId,
   createQuiz,
   updateQuiz,
   deleteQuiz,
+  updateQuestions,
 };

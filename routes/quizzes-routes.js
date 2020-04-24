@@ -4,14 +4,18 @@ const {check} = require('express-validator');
 const checkAuth = require('../middleware/check-auth');
 
 const {
+  getAllQuizzes,
   getQuizzesByCreatorId,
   getQuizById,
   createQuiz,
   updateQuiz,
   deleteQuiz,
+  updateQuestions,
 } = require('../controllers/quizzes-controllers');
 
 const router = express.Router();
+
+router.get('/', getAllQuizzes);
 
 router.get('/:qid', getQuizById);
 
@@ -24,6 +28,8 @@ router.post(
   [check('title').not().isEmpty(), check('description').isLength({min: 5})],
   createQuiz
 );
+
+router.post('/:qid/questions', updateQuestions);
 
 router.patch(
   '/:qid',
