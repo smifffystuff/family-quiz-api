@@ -17,7 +17,7 @@ const fileUpload = multer({
     filename: (req, file, cb) => {
       const ext = MIME_TYPE_MAP[file.mimetype];
       console.log('========= MULTER FILENAME =================');
-      console.log(etx);
+      console.log(ext);
       cb(null, uuid() + '.' + ext);
     },
   }),
