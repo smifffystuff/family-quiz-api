@@ -16,6 +16,10 @@ const answerSchema = new Schema({
     required: true,
     ref: 'Quiz',
   },
+  correct: {
+    type: String,
+    default: 'NA',
+  },
   creator: {
     type: mongoose.Types.ObjectId,
     required: true,

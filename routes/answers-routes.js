@@ -7,8 +7,8 @@ const {
   getAllAnswers,
   getAllAnswersByQuizId,
   getAnswersByQuizId,
-  getAnswersForUser,
   submitAnswer,
+  markAnswer,
 } = require('../controllers/answers-controller');
 
 const router = express.Router();
@@ -19,8 +19,6 @@ router.get('/', getAllAnswers);
 
 router.get('/:qid', getAnswersByQuizId);
 
-router.get('/:qid/:uid', getAnswersForUser);
-
 router.get('/all/:qid', getAllAnswersByQuizId);
 
 router.post(
@@ -28,5 +26,7 @@ router.post(
   [check('answer').not().isEmpty(), check('question').not().isEmpty()],
   submitAnswer
 );
+
+router.patch('/:aid', markAnswer);
 
 module.exports = router;
