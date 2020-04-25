@@ -9,8 +9,7 @@ const getAnswersByQuizId = async (req, res, next) => {
   console.log(quizId);
   const answers = await Answer.find({
     quiz: quizId,
-    creator: req.userData.userId,
-  });
+  }).populate('creator');
   res.json(answers.map(answer => answer.toObject({getters: true})));
 };
 
