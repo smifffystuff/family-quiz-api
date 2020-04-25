@@ -15,9 +15,6 @@ const s3 = new AWS.S3({
 });
 
 const uploadFile = async fileName => {
-  console.log(
-    '================================= UPLOADING ==============================='
-  );
   console.log(fileName);
   console.log(process.env.AWS_BUCKET);
   const fileContents = fs.readFileSync(fileName);
@@ -41,7 +38,6 @@ const uploadFile = async fileName => {
 };
 
 const getUsers = async (req, res, next) => {
-  console.log('================== GET USERS =========================');
   let users;
   try {
     users = await User.find({}, '-password');
@@ -53,7 +49,6 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  console.log('================== SIGNUP =========================');
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -71,7 +66,6 @@ const signup = async (req, res, next) => {
     const error = new HttpError('Signup failed, please try again later', 500);
     return next(error);
   }
-  console.log('================== CHECKED EXISTING =========================');
 
   if (existingUser) {
     const error = new HttpError('Email already exists', 422);
@@ -89,8 +83,6 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-
-  console.log('================== CALLING UPLOAD =========================');
 
   const imageLoc = await uploadFile(req.file.path);
 
@@ -132,7 +124,12 @@ const signup = async (req, res, next) => {
 
   res
     .status(201)
-    .json({userId: createdUser.id, email: createdUser.email, token});
+    .json({
+      userId: createdUser.id,
+      email: createdUser.email,
+      token,
+      isAdmin: existingUser.isAdmin,
+    });
 };
 
 const login = async (req, res, next) => {
@@ -191,6 +188,7 @@ const login = async (req, res, next) => {
 
   res.status(201).json({
     userId: existingUser.id,
+    isAdmin: existingUser.isAdmin,
     email: existingUser.email,
     token,
   });

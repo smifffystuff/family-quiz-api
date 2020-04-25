@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const quizzesRoutes = require('./routes/quizzes-routes');
 const usersRoutes = require('./routes/users-routes');
+const answersRoutes = require('./routes/answers-routes');
 const HttpError = require('./models/http-error');
 
 const app = express();
@@ -30,13 +31,13 @@ app.use((req, res, next) => {
 
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/answers', answersRoutes);
 
 app.use((req, res, next) => {
   throw new HttpError('Could not find this route', 404);
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
   if (res.headerSent) {
     return next(error);
   }

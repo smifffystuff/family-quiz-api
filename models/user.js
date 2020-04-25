@@ -21,6 +21,10 @@ const userSchema = new Schema({
   image: {
     type: String,
   },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   quizzes: [
     {
       type: mongoose.Types.ObjectId,
