@@ -15,11 +15,8 @@ const s3 = new AWS.S3({
 });
 
 const uploadFile = async fileName => {
-  console.log(fileName);
-  console.log(process.env.AWS_BUCKET);
   const fileContents = fs.readFileSync(fileName);
   const parsedPath = path.parse(fileName);
-  console.log(`${process.env.IMAGES_FOLDER}${parsedPath.base}`);
 
   const params = {
     Bucket: process.env.AWS_BUCKET,
@@ -94,8 +91,6 @@ const signup = async (req, res, next) => {
     quizzes: [],
   });
 
-  console.log(createdUser);
-
   try {
     await createdUser.save();
   } catch (err) {
@@ -122,14 +117,12 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res
-    .status(201)
-    .json({
-      userId: createdUser.id,
-      email: createdUser.email,
-      token,
-      isAdmin: existingUser.isAdmin,
-    });
+  res.status(201).json({
+    userId: createdUser.id,
+    email: createdUser.email,
+    token,
+    isAdmin: createdUser.isAdmin,
+  });
 };
 
 const login = async (req, res, next) => {
