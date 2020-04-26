@@ -1,16 +1,24 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const socketIO = require('socket.io');
 
 const quizzesRoutes = require('./routes/quizzes-routes');
 const usersRoutes = require('./routes/users-routes');
 const answersRoutes = require('./routes/answers-routes');
 const HttpError = require('./models/http-error');
 
+const {socketConnection} = require('./socket_actions');
+
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
+
+io.on('connection', socketConnection);
 
 app.use(bodyParser.json());
 
@@ -52,7 +60,7 @@ mongoose
   )
   .then(() => {
     const port = process.env.PORT || 5000;
-    app.listen(process.env.PORT || 5000, () => {
+    server.listen(process.env.PORT || 5000, () => {
       console.log(`Server running on port ${port}`);
     });
   })
