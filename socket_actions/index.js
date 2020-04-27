@@ -1,4 +1,12 @@
-const {addUser, removeUser, getUser, getAllUsers} = require('./users');
+const Answer = require('../models/answer');
+
+const {
+  addUser,
+  removeUser,
+  getUser,
+  getAllUsers,
+  getUserByUserId,
+} = require('./users');
 
 const socketConnection = socket => {
   console.log('We have a new connection');
@@ -32,6 +40,26 @@ const socketConnection = socket => {
       user: user ? user.name : 'unknown',
       text: msg,
     });
+  });
+  socket.on('answer', answer => {
+    console.log(answer);
+    const user = getUser(socket.id);
+    console.log(
+      `${user.name} answered question ${answer.number}\n${answer.answer}`
+    );
+    socket.broadcast.to('quiz').emit('answer_submitted', answer);
+  });
+
+  socket.on('answer-marked', ({answer}) => {
+    const user = getUserByUserId(userId);
+    socket.broadcast.to('quiz').emit('message', {
+      user: 'admin',
+      text: `${user ? user.name : 'unknown'} got question ${questNum} ${
+        result === 'YES' ? 'Correct' : 'Wrong'
+      }`,
+    });
+    // console.log(questNum, result, userId);
+    // socket.send();
   });
 
   socket.on('leave', () => {

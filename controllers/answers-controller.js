@@ -31,7 +31,7 @@ const submitAnswer = (req, res, next) => {
     creator: req.userData.userId,
   });
   newAnswer.save();
-  res.json({message: 'Answer submitted'});
+  res.json(newAnswer.toObject({getters: true}));
 };
 
 const getAllAnswersByQuizId = async (req, res, next) => {
