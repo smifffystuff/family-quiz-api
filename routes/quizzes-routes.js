@@ -29,8 +29,6 @@ router.post(
   createQuiz
 );
 
-router.post('/:qid/questions', updateQuestions);
-
 router.patch(
   '/:qid',
   [check('title').not().isEmpty(), check('description').isLength({min: 5})],
