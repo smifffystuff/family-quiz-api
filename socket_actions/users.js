@@ -29,6 +29,10 @@ const getUser = id => {
   return users.find(user => user.id === id);
 };
 
+const getUserByUserId = userId => {
+  return users.find(user => user.userId === userId);
+};
+
 const getAllUsers = () => {
   return users;
 };
@@ -38,4 +42,5 @@ module.exports = {
   removeUser,
   getUser,
   getAllUsers,
+  getUserByUserId,
 };
